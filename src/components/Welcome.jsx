@@ -7,7 +7,7 @@ function Welcome({ user }) {
     <Container>
         <img src={Robot} alt='Robot'/>
         <h1>Bienvenu, <span>{user.userName}!</span></h1>
-        <h3>S'il vous plait choisisser la conversation que vous voulez lancer</h3>
+        <h3>S'il vous plait choisissez la conversation que vous voulez lancer</h3>
     </Container>
   )
 }
