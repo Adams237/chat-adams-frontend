@@ -1,4 +1,4 @@
-export const host = "http://localhost:5000"
+export const host = "https://chatapi-lezp.onrender.com"
 export const RegisterAPI = `${host}/chat/user/auth/register`
 export const LoginAPI = `${host}/chat/user/auth/login`
 export const SetAvatarApi = `${host}/chat/user/auth/setAvatar`
