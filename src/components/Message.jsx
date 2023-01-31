@@ -8,7 +8,7 @@ function Message() {
 }
 
 const Container = styled.div`
-height: 80%;
+height: 100%;
 `
 
 

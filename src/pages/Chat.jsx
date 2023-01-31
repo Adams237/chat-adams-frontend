@@ -15,6 +15,7 @@ function Chat() {
   const [currentUser, setCurrentUser] = useState(undefined)
   const [currentChat, setCurrentChat] = useState(undefined)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [showContacts, setShowContacts] = useState(false)
   useEffect(()=>{
     const setUserCurrent = async()=>{
         if(!localStorage.getItem('chat-app-user'))
@@ -52,12 +53,14 @@ function Chat() {
   const handleChatChange =(chat)=>{
     setCurrentChat(chat)
   }
+  const handleShow = ()=> setShowContacts(true)
+  const handleClose = ()=> setShowContacts(false)
   return (
     <Container>
       <div className="container">
-        <Contacts contacts = {contacts} currentUser = {currentUser} changeChat = {handleChatChange}/>
+        <Contacts show = {showContacts} handleCloseContact = {handleClose} contacts = {contacts} currentUser = {currentUser} changeChat = {handleChatChange}/>
         {
-          ( isLoaded && currentChat===undefined)?(<Welcome user = {currentUser}/>):(<ChatContainer chat = {currentChat} currentUser={currentUser} socket = {socket}/>)
+          ( isLoaded && currentChat===undefined)?(<Welcome handleShowContact = {handleShow}  user = {currentUser}/>):(<ChatContainer handleShowContact = {handleShow}  chat = {currentChat} currentUser={currentUser} socket = {socket}/>)
         }
         
       </div>
@@ -83,6 +86,9 @@ const Container = styled.div`
     grid-template-columns: 25% 75%;
     @media screen and (min-width: 720px) and (max-width: 1080px){
       grid-template-columns: 35% 65%;
+    }
+    @media only screen and (max-width: 720px){
+      grid-template-columns: none;
     }
 
   }
