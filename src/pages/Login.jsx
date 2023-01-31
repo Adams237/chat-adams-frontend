@@ -1,19 +1,22 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Logo from '../assets/e363e38ceffaece60e00b87ee4286e08.gif'
-import { ToastContainer, toast} from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios'
+import Spinner from 'react-bootstrap/Spinner'
+
 import { LoginAPI } from '../utils/APIRoutes'
 
 
 function Login() {
 
     const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false)
     const [values, setValue] = useState({
-        email:'',
-        password:'',
+        email: '',
+        password: '',
     })
     const toastTheme = {
         position: "top-center",
@@ -22,60 +25,81 @@ function Login() {
         draggable: true,
         theme: "light",
     }
-    useEffect(()=>{
-      if(localStorage.getItem('chat-app-user')){
-        navigate("/")
-      }
-    },[navigate])
-    const handleSubmit = async(e)=>{
+    useEffect(() => {
+        if (localStorage.getItem('chat-app-user')) {
+            navigate("/")
+        }
+    }, [navigate])
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        if(validation()){
+        setIsLoading(true)
+        if (validation()) {
             const { email, password } = values
-            const {data} = await axios.post(LoginAPI,{
-                email,
-                password,
-            })
-            if(data.status === false){
-                toast.error(data.error, toastTheme)
+            try {
+                const { data } = await axios.post(LoginAPI, {
+                    email,
+                    password,
+                })
+                if (data.status === false) {
+                    toast.error(data.error, toastTheme)
+                    setIsLoading(false)
+                }
+                if (data.status === true) {
+                    localStorage.setItem('chat-app-user', JSON.stringify(data.user))
+                    navigate('/')
+                    setIsLoading(false)
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('une erreur est survenue vaillez reesayer', toastTheme)
+                setIsLoading(false)
             }
-            if(data.status === true){
-                localStorage.setItem('chat-app-user', JSON.stringify(data.user))
-                navigate('/')
-            }
+            
         }
     }
-    const validation = ()=>{
+    const validation = () => {
         const { email, password } = values
-        if (password.length === 0){
+        if (password.length === 0) {
             toast.error('email et mot de passe requis', toastTheme)
+            setIsLoading(false)
             return false
         }
-        else if ( email === ""){
+        else if (email === "") {
             toast.error('email et mot de passe requis', toastTheme)
+            setIsLoading(false)
             return false
         }
         return true
     }
-    const handleChange = (e)=>{
-        setValue({...values, [e.target.name]: e.target.value})
+    const handleChange = (e) => {
+        setValue({ ...values, [e.target.name]: e.target.value })
     }
-  return (
-    <>
-        <FormConatainer>
-            <form onSubmit={(e)=>handleSubmit(e)}>
-                <div className="brand">
-                    <img src={Logo} alt="Logo" />
-                    <h1>chat-Adams</h1>
-                </div>
-                <input type="email" placeholder='votre email' name='email' onChange={(e)=>handleChange(e)}/>
-                <input type="password" placeholder='votre mot de passe' name='password' onChange={(e)=>handleChange(e)}/>
-                <button type='submit'>Connexion</button>
-                <span>n'avez-vous pas de compte? <Link to="/register">S'enregistrer</Link></span>
-            </form>
-        </FormConatainer>
-        <ToastContainer/>
-    </>
-  )
+    return (
+        <>
+            <FormConatainer>
+                <form onSubmit={(e) => handleSubmit(e)}>
+                    <div className="brand">
+                        <img src={Logo} alt="Logo" />
+                        <h1>chat-Adams</h1>
+                    </div>
+                    <input type="email" placeholder='votre email' name='email' onChange={(e) => handleChange(e)} />
+                    <input type="password" placeholder='votre mot de passe' name='password' onChange={(e) => handleChange(e)} />
+                    {
+                        isLoading ? (
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                        ) : (
+                            <button type='submit'>Connexion</button>
+                        )
+                    }
+
+                    <span>n'avez-vous pas de compte? <Link to="/register">S'enregistrer</Link></span>
+                </form>
+            </FormConatainer>
+            <ToastContainer />
+        </>
+    )
 }
 
 const FormConatainer = styled.div`

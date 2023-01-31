@@ -1,21 +1,24 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Logo from '../assets/e363e38ceffaece60e00b87ee4286e08.gif'
-import { ToastContainer, toast} from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios'
+import Spinner from 'react-bootstrap/Spinner'
+
 import { RegisterAPI } from '../utils/APIRoutes'
 
 
 function Register() {
 
     const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false)
     const [values, setValue] = useState({
-        userName:'',
-        email:'',
-        password:'',
-        confirmPassword:''
+        userName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
     })
     const toastTheme = {
         position: "top-center",
@@ -24,71 +27,93 @@ function Register() {
         draggable: true,
         theme: "light",
     }
-    useEffect(()=>{
-        if(localStorage.getItem('chat-app-user')){
-          navigate("/")
+    useEffect(() => {
+        if (localStorage.getItem('chat-app-user')) {
+            navigate("/")
         }
-      },[navigate])
-    const handleSubmit = async(e)=>{
+    }, [navigate])
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        if(validation()){
+        setIsLoading(true)
+        if (validation()) {
             const { userName, email, password } = values
-            const {data} = await axios.post(RegisterAPI,{
-                userName,
-                email,
-                password,
-            })
-            if(data.status === false){
-                toast.error(data.msg, toastTheme)
+            try {
+                const { data } = await axios.post(RegisterAPI, {
+                    userName,
+                    email,
+                    password,
+                })
+                if (data.status === false) {
+                    toast.error(data.msg, toastTheme)
+                    setIsLoading(false)
+                }
+                if (data.status === true) {
+                    localStorage.setItem('chat-app-user', JSON.stringify(data.user))
+                    setIsLoading(false)
+                    navigate('/')
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('une erreur est survenue vaillez reesayer', toastTheme)
+                setIsLoading(false)
             }
-            if(data.status === true){
-                localStorage.setItem('chat-app-user', JSON.stringify(data.user))
-                navigate('/')
-            }
+
         }
     }
-    const validation = ()=>{
+    const validation = () => {
         const { userName, email, password, confirmPassword } = values
-        if(password !== confirmPassword){
+        if (password !== confirmPassword) {
             toast.error("les mots de passe ne correspondent pas", toastTheme)
+            setIsLoading(false)
             return false
         }
-        else if (userName.length<4){
+        else if (userName.length < 4) {
             toast.error('votre nom doit contenir au moins 4 charatère', toastTheme)
+            setIsLoading(false)
             return false
         }
-        else if (password.length<8){
+        else if (password.length < 8) {
             toast.error('votre mot de passe doit contenir au moins 8 charactère', toastTheme)
+            setIsLoading(false)
             return false
         }
-        else if (!email.includes('@') || email === ""){
+        else if (!email.includes('@') || email === "") {
             toast.error('email incorrect', toastTheme)
+            setIsLoading(false)
             return false
         }
         return true
     }
-    const handleChange = (e)=>{
-        setValue({...values, [e.target.name]: e.target.value})
+    const handleChange = (e) => {
+        setValue({ ...values, [e.target.name]: e.target.value })
     }
-  return (
-    <>
-        <FormConatainer>
-            <form onSubmit={(e)=>handleSubmit(e)}>
-                <div className="brand">
-                    <img src={Logo} alt="Logo" />
-                    <h1>chat-Adams</h1>
-                </div>
-                <input type="text" placeholder='votre nom' name='userName' onChange={(e)=>handleChange(e)}/>
-                <input type="email" placeholder='votre email' name='email' onChange={(e)=>handleChange(e)}/>
-                <input type="password" placeholder='votre mot de passe' name='password' onChange={(e)=>handleChange(e)}/>
-                <input type="password" placeholder='entrer à nouveau votre mot de passe' name='confirmPassword' onChange={(e)=>handleChange(e)}/>
-                <button type='submit'>Créer un compte</button>
-                <span>avez-vous déjà un compte? <Link to="/login">Login</Link></span>
-            </form>
-        </FormConatainer>
-        <ToastContainer/>
-    </>
-  )
+    return (
+        <>
+            <FormConatainer>
+                <form onSubmit={(e) => handleSubmit(e)}>
+                    <div className="brand">
+                        <img src={Logo} alt="Logo" />
+                        <h1>chat-Adams</h1>
+                    </div>
+                    <input type="text" placeholder='votre nom' name='userName' onChange={(e) => handleChange(e)} />
+                    <input type="email" placeholder='votre email' name='email' onChange={(e) => handleChange(e)} />
+                    <input type="password" placeholder='votre mot de passe' name='password' onChange={(e) => handleChange(e)} />
+                    <input type="password" placeholder='entrer à nouveau votre mot de passe' name='confirmPassword' onChange={(e) => handleChange(e)} />
+                    {
+                        isLoading ? (
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                        ) : (
+                            <button type='submit'>Créer un compte</button>
+                        )
+                    }
+                    <span>avez-vous déjà un compte? <Link to="/login">Login</Link></span>
+                </form>
+            </FormConatainer>
+            <ToastContainer />
+        </>
+    )
 }
 
 const FormConatainer = styled.div`
